@@ -24,15 +24,15 @@ long distance_cap, distance_label, distance_bottle;
 long just_throwed_cap, just_throwed_label, just_throwed_bottle;
 
 //servo motor
-#define FULL_OPEN_CAP 175
-#define FULL_OPEN_LABEL 175
+#define FULL_OPEN_CAP 178
+#define FULL_OPEN_LABEL 168
 #define FULL_OPEN_BOTTLE 175
-#define LITTLE_OPEN_CAP 130
+#define LITTLE_OPEN_CAP 155
 #define LITTLE_OPEN_LABEL 130
-#define LITTLE_OPEN_BOTTLE 130
-#define CLOSE_CAP 95
-#define CLOSE_LABEL 95
-#define CLOSE_BOTTLE 95
+#define LITTLE_OPEN_BOTTLE 145
+#define CLOSE_CAP 85
+#define CLOSE_LABEL 85
+#define CLOSE_BOTTLE 85
 #define YEAH_CAP 160
 #define YEAH_LABEL 160
 #define YEAH_BOTTLE 160
@@ -67,7 +67,9 @@ int countNum;
 #define THROWED_LABEL 10
 #define THROWED_BOTTLE 10
 
-int period;
+int period_cap;
+int period_label;
+int period_bottle;
 
 int phase;
 
@@ -108,7 +110,9 @@ void setup() {
 
   randomSeed(analogRead(0));
 
-  period = 20;
+  period_cap = 0;
+  period_label = 0;
+  period_bottle = 0;
 
   phase = START;
 
@@ -251,12 +255,14 @@ void patapata (int cap, int label, int bottle) {
 
   if (cap) {
     if (motorAngle_cap == LITTLE_OPEN_CAP) { //パタパタの「パ」の角度で
-      if ((countNum - n_cap) == period) { //かつ「パ」になったタイミングから100カウント済んでいたら
+      period_cap = random(2, 5);
+      if ((countNum - n_cap) > period_cap) { //かつ「パ」になったタイミングから100カウント済んでいたら
         motorAngle_cap = CLOSE_CAP;
         n_cap = countNum;
       }
     } else if (motorAngle_cap == CLOSE_CAP) { //パタパタの「タ」の角度で
-      if ((countNum - n_cap) == period) { //100カウント済んでいたら
+      period_cap = random(5, 10);
+      if ((countNum - n_cap) > period_cap) { //100カウント済んでいたら
         motorAngle_cap = LITTLE_OPEN_CAP;
         n_cap = countNum;
       }
@@ -265,15 +271,17 @@ void patapata (int cap, int label, int bottle) {
   }
   if (label) {
     if (motorAngle_label == LITTLE_OPEN_LABEL) { //パタパタの「パ」の角度で
+      period_label = random(2, 5);
       Serial.println("た１");
-      if ((countNum - n_label) == period) { //かつ「パ」になったタイミングから100カウント済んでいたら
+      if ((countNum - n_label) > period_label) { //かつ「パ」になったタイミングから100カウント済んでいたら
         motorAngle_label = CLOSE_LABEL;
         Serial.println("た");
         n_label = countNum;
       }
     } else if (motorAngle_label == CLOSE_LABEL) { //パタパタの「タ」の角度で
+      period_label = random(10, 25);
       Serial.println("ぱ１");
-      if ((countNum - n_label) == period) { //100カウント済んでいたら
+      if ((countNum - n_label) > period_label) { //100カウント済んでいたら
         motorAngle_label = LITTLE_OPEN_LABEL;
         Serial.println("ぱ");
         n_label = countNum;
@@ -283,12 +291,14 @@ void patapata (int cap, int label, int bottle) {
   }
   if (bottle) {
     if (motorAngle_bottle == LITTLE_OPEN_BOTTLE) { //パタパタの「パ」の角度で
-      if ((countNum - n_bottle) == period) { //かつ「パ」になったタイミングから100カウント済んでいたら
+      period_bottle = random(5, 10);
+      if ((countNum - n_bottle) > period_bottle) { //かつ「パ」になったタイミングから100カウント済んでいたら
         motorAngle_bottle = CLOSE_BOTTLE;
         n_bottle = countNum;
       }
     } else if (motorAngle_bottle == CLOSE_BOTTLE) { //パタパタの「タ」の角度で
-      if ((countNum - n_bottle) == period) { //100カウント済んでいたら
+      period_bottle = random(25, 40);
+      if ((countNum - n_bottle) > period_bottle) { //100カウント済んでいたら
         motorAngle_bottle = LITTLE_OPEN_BOTTLE;
         n_bottle = countNum;
       }
