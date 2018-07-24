@@ -71,6 +71,10 @@ int period;
 
 int phase;
 
+int not_cap;
+int not_label;
+int not_bottle;
+
 void setup() {
   Serial.begin(9600);
   randomSeed(analogRead(0));
@@ -104,17 +108,25 @@ void setup() {
 
   randomSeed(analogRead(0));
 
-  period = 0;
+  period = 20;
 
   phase = START;
+
+  not_cap = false;
+  not_label = false;
+  not_bottle = false;
 }
 
 
 void loop() {
 
-  if((countNum % 10) == 0){
-    Serial.println(phase);
-  }
+  Serial.print(countNum);
+  Serial.print(":::");
+  Serial.print(n_cap);
+  Serial.print(":::");
+  Serial.print(distance_cap);
+  Serial.print(":::");
+  Serial.println(phase);
 
   distance_cap = Us_judge_hand_cap.MeasureInCentimeters();
   just_throwed_cap = Us_throwed_cap.MeasureInCentimeters();
@@ -125,7 +137,7 @@ void loop() {
   distance_bottle = Us_judge_hand_bottle.MeasureInCentimeters();
   just_throwed_bottle = Us_throwed_bottle.MeasureInCentimeters();
 
-  if (phase == START && distance_bottle < 50) {
+  if (phase == START && distance_bottle < 50 && RANGE < distance_bottle) {
     motorAngle_cap = LITTLE_OPEN_CAP;
     motorAngle_label = LITTLE_OPEN_LABEL;
     motorAngle_bottle = LITTLE_OPEN_BOTTLE;
@@ -144,19 +156,23 @@ void loop() {
       motorAngle_cap = LITTLE_OPEN_CAP;
       n_cap = countNum;
       phase = CAP_START;
-    } else if (distance_cap < RANGE){
+    } else if (distance_cap < RANGE) {
       phase = CAP_START;
     }
-     
+
   }
 
   if (phase == CAP_START) {
     //CAP以外に近づけたら→CAPパタパタ
-    if (distance_label < RANGE || distance_bottle < RANGE) {
+    if ((distance_label < RANGE || distance_bottle < RANGE) && (not_cap == false)) {
+      not_cap = true;
+    }
+    if (not_cap == true) {
       patapata(true, false, false);
       Motor_label.write(CLOSE_LABEL);
       Motor_bottle.write(CLOSE_BOTTLE);
-    } else if (distance_cap < RANGE) {
+    }
+    if (distance_cap < RANGE) {
       //CAPに近づけたら→CAPオープン
       Motor_cap.write(FULL_OPEN_CAP);
       Motor_label.write(CLOSE_LABEL);
@@ -178,11 +194,10 @@ void loop() {
 
   if (phase == LABEL_START) {
     //LABELパタパタ
-    if (distance_cap < RANGE || distance_bottle < RANGE) {
-      patapata(false, true, false);
-      Motor_cap.write(CLOSE_CAP);
-      Motor_bottle.write(CLOSE_BOTTLE);
-    } else if (distance_label < RANGE) {
+    patapata(false, true, false);
+    Motor_cap.write(CLOSE_CAP);
+    Motor_bottle.write(CLOSE_BOTTLE);
+    if (distance_label < RANGE) {
       //CAPに近づけたら→CAPオープン
       Motor_cap.write(CLOSE_CAP);
       Motor_label.write(FULL_OPEN_LABEL);
@@ -203,11 +218,10 @@ void loop() {
 
   if (phase == BOTTLE_START) {
     //BOTTLEパタパタ
-    if (distance_cap < RANGE || distance_label < RANGE) {
-      patapata(false, false, true);
-      Motor_cap.write(CLOSE_CAP);
-      Motor_label.write(CLOSE_LABEL);
-    } else if (distance_bottle < RANGE) {
+    patapata(false, false, true);
+    Motor_cap.write(CLOSE_CAP);
+    Motor_label.write(CLOSE_LABEL);
+    if (distance_bottle < RANGE) {
       Motor_cap.write(CLOSE_CAP);
       Motor_label.write(CLOSE_LABEL);
       Motor_bottle.write(FULL_OPEN_BOTTLE);
@@ -247,19 +261,25 @@ void patapata (int cap, int label, int bottle) {
         n_cap = countNum;
       }
     }
+    Motor_cap.write(motorAngle_cap);
   }
   if (label) {
     if (motorAngle_label == LITTLE_OPEN_LABEL) { //パタパタの「パ」の角度で
+      Serial.println("た１");
       if ((countNum - n_label) == period) { //かつ「パ」になったタイミングから100カウント済んでいたら
         motorAngle_label = CLOSE_LABEL;
+        Serial.println("た");
         n_label = countNum;
       }
     } else if (motorAngle_label == CLOSE_LABEL) { //パタパタの「タ」の角度で
+      Serial.println("ぱ１");
       if ((countNum - n_label) == period) { //100カウント済んでいたら
         motorAngle_label = LITTLE_OPEN_LABEL;
+        Serial.println("ぱ");
         n_label = countNum;
       }
     }
+    Motor_label.write(motorAngle_label);
   }
   if (bottle) {
     if (motorAngle_bottle == LITTLE_OPEN_BOTTLE) { //パタパタの「パ」の角度で
@@ -273,6 +293,7 @@ void patapata (int cap, int label, int bottle) {
         n_bottle = countNum;
       }
     }
+    Motor_bottle.write(motorAngle_bottle);
   }
 }
 
