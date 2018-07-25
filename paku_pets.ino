@@ -33,9 +33,9 @@ long just_throwed_cap, just_throwed_label, just_throwed_bottle;
 #define CLOSE_CAP 85
 #define CLOSE_LABEL 85
 #define CLOSE_BOTTLE 85
-#define YEAH_CAP 160
-#define YEAH_LABEL 160
-#define YEAH_BOTTLE 160
+#define YEAH_CAP 178
+#define YEAH_LABEL 172
+#define YEAH_BOTTLE 168
 #define SATISFIED_CAP 94
 #define SATISFIED_LABEL 94
 #define SATISFIED_BOTTLE 94
@@ -297,7 +297,7 @@ void patapata (int cap, int label, int bottle) {
         n_bottle = countNum;
       }
     } else if (motorAngle_bottle == CLOSE_BOTTLE) { //パタパタの「タ」の角度で
-      period_bottle = random(25, 40);
+      period_bottle = random(20, 30);
       if ((countNum - n_bottle) > period_bottle) { //100カウント済んでいたら
         motorAngle_bottle = LITTLE_OPEN_BOTTLE;
         n_bottle = countNum;
